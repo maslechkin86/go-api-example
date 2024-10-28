@@ -1,0 +1,4 @@
+package: port
+generate:
+  models: true
+output: http_types.gen.go

@@ -1,0 +1,322 @@
+openapi: 3.0.1
+info:
+  version: 1.0.0
+  title: User Service
+  description: This API allows for the management of users.
+
+servers:
+  - description: Local
+    url: http://localhost:8080
+
+tags:
+  - name: User Management
+    description: Manage users.
+
+paths:
+  /v1/healthz:
+    get:
+      summary: The health check endpoint
+      description: Endpoint to check the health status of the service.
+      operationId: healthzCheck
+      responses:
+        200:
+          description: The service is healthy.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthCheckResponse"
+
+  /v1/users:
+    post:
+      security:
+        - bearerAuth: [ ]
+      summary: Create a new user
+      description: Endpoint to create a new user.
+      operationId: createUser
+      requestBody:
+        description: The details of the user to be created.
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserCreateRequest"
+        required: true
+      responses:
+        201:
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        400:
+          description: Invalid input data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        401:
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        403:
+          description: Forbidden action
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        409:
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        502:
+          description: Bad Gateway
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      tags:
+        - User Management
+
+    get:
+      security:
+        - bearerAuth: [ ]
+      summary: Retrieve users list
+      description: Endpoint to retrieve the all available users.
+      operationId: getUserList
+      parameters:
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 0
+            default: 20
+          required: true
+          description: The limit of items which returned per request.
+          x-go-type: int64
+        - in: query
+          name: skip
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+          required: true
+          description: The amount of items to skip.
+          x-go-type: int64
+      responses:
+        200:
+          description: User list retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserListResponse"
+        400:
+          description: Invalid input data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        401:
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        403:
+          description: Forbidden action
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        409:
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        502:
+          description: Bad Gateway
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      tags:
+        - User Management
+
+  /v1/users/{id}:
+    parameters:
+      - name: id
+        description: The identifier of a user.
+        in: path
+        schema:
+          type: integer
+        required: true
+        x-go-name: ID
+
+    get:
+      security:
+        - bearerAuth: [ ]
+      summary: Retrieve user details
+      description: Endpoint to retrieve the user details by its ID.
+      operationId: getUser
+      responses:
+        200:
+          description: User details retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        400:
+          description: Invalid input data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        401:
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        403:
+          description: Forbidden action
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        409:
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        502:
+          description: Bad Gateway
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      tags:
+        - User Management
+
+components:
+
+  schemas:
+    SuccessResponse:
+      type: object
+      required:
+        - slug
+      properties:
+        slug:
+          type: string
+
+    ErrorResponse:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          description: The HTTP status code.
+        message:
+          type: string
+          description: A descriptive error message.
+
+    HealthCheckResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          description: The health check status (e.g., "ok", "error").
+        timestamp:
+          type: string
+          format: date-time
+          description: The current timestamp in ISO 8601 format.
+      required:
+        - status
+        - timestamp
+
+    UserCreateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          description: The user name.
+      required:
+        - name
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: The user identifier.
+          x-go-name: ID
+        name:
+          type: string
+          description: The user name.
+      required:
+        - id
+        - name
+
+    UserListResponse:
+      type: object
+      properties:
+        totalItems:
+          type: integer
+          description: The total items.
+        limit:
+          type: integer
+          description: The limit of items which returned per request.
+        skip:
+          type: integer
+          description: The amount of items to skip.
+        items:
+          type: array
+          description: The list of users.
+          items:
+            $ref: '#/components/schemas/User'
+      required:
+        - totalItems
+        - limit
+        - skip
+        - items
+
+  securitySchemes:
+    bearerAuth:
+      bearerFormat: JWT
+      scheme: bearer
+      type: http
